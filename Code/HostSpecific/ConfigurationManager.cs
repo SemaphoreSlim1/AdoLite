@@ -76,7 +76,7 @@ namespace HostSpecific
 
         #endregion
 
-        private static void Init(SupportedEnvironment runningEnvironment)
+        public static void Init(SupportedEnvironment runningEnvironment)
         { 
             if(HostSpecific.ConfigurationManager.IsInitialized)
             { return;  }
