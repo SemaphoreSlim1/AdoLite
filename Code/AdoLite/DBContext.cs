@@ -118,6 +118,7 @@ namespace AdoLite
         #endregion
 
         #region Transaction
+
         private IDbTransaction _Transaction;
 
         /// <summary>
@@ -197,8 +198,17 @@ namespace AdoLite
 
             var da = ProviderFactory.CreateDataAdapter();
             da.SelectCommand = cmd as DbCommand;
-            da.Fill(ds); //if an exception is thrown here, intentionally do not catch it.
-            //let the caller handle it and rollback the transaction appropriately.
+
+            try
+            {
+                da.Fill(ds);
+            }
+            catch(Exception ex)
+            {
+                //TODO : Add some logging
+                throw; //allow the calling method a chance to log the exception.
+            }
+            
 
             if (da is IDisposable)
             { (da as IDisposable).Dispose(); }
@@ -223,7 +233,10 @@ namespace AdoLite
                 try
                 { ds = context.ExecuteQuery(cmd); }
                 catch 
-                {  ds = new DataSet(); }
+                {  
+                    //TODO : Add some logging
+                    throw; 
+                }
             }
 
             return ds;
@@ -252,6 +265,16 @@ namespace AdoLite
         /// <summary>
         /// Creates a command to be used on the default context
         /// </summary>
+        /// <param name="commandText">The command text</param>
+        /// <returns>A command to be used on the default context</returns>
+        public static IDbCommand Command(StringBuilder commandText)
+        {
+            return Command(commandText.ToString());
+        }
+
+        /// <summary>
+        /// Creates a command to be used on the default context
+        /// </summary>
         /// <param name="commandText">the command text</param>
         /// <returns>A command to be used on the default context</returns>
         public static IDbCommand Command(String commandText)
@@ -270,6 +293,7 @@ namespace AdoLite
         {
             if (this.UsesTransaction)
             {
+                //commit the existing transaction and start another
                 this.Transaction.Commit();
                 _Transaction = _Connection.BeginTransaction();
             }

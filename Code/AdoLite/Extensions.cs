@@ -40,6 +40,25 @@ namespace AdoLite
         }
 
         /// <summary>
+        /// Given a page size, determines the number of pages of items contained within this IEnumerable
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items">The items in this enumerable</param>
+        /// <param name="pageSize">The desired number of items contained in a page</param>
+        /// <returns>The number of pages of items contained within <see cref="items"/></returns>
+        public static int PageCount<T>(this IEnumerable<T> items, int pageSize)
+        {
+            var pageCount = 0;
+
+            if(items.Count() % pageSize == 0)
+            { pageCount = items.Count() / pageSize; }
+            else
+            { pageCount = (items.Count() / pageSize) + 1; }
+
+            return pageCount;
+        }
+
+        /// <summary>
         /// Creates a parameter with the specified name and value, and adds it to this command
         /// </summary>
         /// <param name="cmd">The command to add the parameter to</param>
@@ -51,6 +70,17 @@ namespace AdoLite
             p.ParameterName = name;
             p.Value = value ?? DBNull.Value;
             cmd.Parameters.Add(p);
+        }
+
+        /// <summary>
+        /// Creates parameters from the dictionary, and adds them to this command
+        /// </summary>
+        /// <param name="cmd">The command to add the parameters to</param>
+        /// <param name="cmdParams">The parameters to add to the command</param>
+        public static void AddParameters(this System.Data.IDbCommand cmd, IDictionary<String, Object> cmdParams)
+        { 
+            foreach(var kvp in cmdParams)
+            { cmd.AddParameter(kvp.Key, kvp.Value); }
         }
 
         /// <summary>
